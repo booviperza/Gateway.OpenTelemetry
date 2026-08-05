@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Gateway.OpenTelemetry.AspNetCore/Gateway.OpenTelemetry.AspNetCore.csproj" />
     <Project Path="src/Gateway.OpenTelemetry.Core/Gateway.OpenTelemetry.Core.csproj" />
   </Folder>
 </Solution>

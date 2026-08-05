@@ -6,4 +6,10 @@
 
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="Utilities\" />
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>
