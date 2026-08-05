@@ -1,0 +1,46 @@
+<Project>
+
+  <PropertyGroup>
+
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <!-- OpenTelemetry -->
+
+    <PackageVersion Include="OpenTelemetry"
+                    Version="1.14.0" />
+
+    <PackageVersion Include="OpenTelemetry.Api"
+                    Version="1.14.0" />
+
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting"
+                    Version="1.14.0" />
+
+    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"
+                    Version="1.14.0-beta.1" />
+
+    <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore"
+                    Version="1.14.0" />
+
+    <PackageVersion Include="OpenTelemetry.Instrumentation.Http"
+                    Version="1.14.0" />
+
+    <!-- ASP.NET -->
+
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions"
+                    Version="10.0.0" />
+
+    <!-- YARP -->
+
+    <PackageVersion Include="Yarp.ReverseProxy"
+                    Version="2.3.0" />
+
+    <PackageVersion Include="Yarp.Telemetry.Consumption"
+                    Version="2.3.0" />
+
+  </ItemGroup>
+
+</Project>
