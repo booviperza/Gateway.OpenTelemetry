@@ -1,0 +1,11 @@
+<Project>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'OpenTelemetry.Spike'">
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'Gateway.OpenTelemetry.IntegrationHost'">
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+</Project>
