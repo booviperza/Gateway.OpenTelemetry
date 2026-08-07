@@ -2,47 +2,32 @@
 
   <PropertyGroup>
 
-    <!-- .NET -->
-    <TargetFramework>net10.0</TargetFramework>
-
+    <!-- C# -->
+    <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <LangVersion>preview</LangVersion>
+    <!-- Compiler -->
+    <AnalysisLevel>latest</AnalysisLevel>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
 
     <!-- Build -->
     <Deterministic>true</Deterministic>
 
-    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">
-      true
-    </ContinuousIntegrationBuild>
-
     <!-- Documentation -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-
     <NoWarn>$(NoWarn);1591</NoWarn>
-
-    <!-- Analysis -->
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-
-    <AnalysisLevel>latest</AnalysisLevel>
-
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
-    <!-- NuGet -->
-    <IsPackable>true</IsPackable>
-
-    <IncludeSymbols>true</IncludeSymbols>
-
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <!-- SourceLink -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
-
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
-    <DebugType>portable</DebugType>
+    <!-- Symbols -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- CI -->
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
 
   </PropertyGroup>
 

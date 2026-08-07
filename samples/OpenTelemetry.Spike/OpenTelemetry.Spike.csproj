@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="OpenTelemetry.Extensions.Hosting" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+        <PackageReference Include="OpenTelemetry.Exporter.Console" />
+        <PackageReference Include="Yarp.ReverseProxy" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Gateway.OpenTelemetry.Core\Gateway.OpenTelemetry.Core.csproj" />
+        <ProjectReference Include="..\..\src\Gateway.OpenTelemetry.AspNetCore\Gateway.OpenTelemetry.AspNetCore.csproj" />
+        <ProjectReference Include="..\..\src\Gateway.OpenTelemetry.Yarp\Gateway.OpenTelemetry.Yarp.csproj" />
+    </ItemGroup>
+
+</Project>

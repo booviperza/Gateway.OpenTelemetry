@@ -4,12 +4,12 @@
 
         <TargetFramework>net10.0</TargetFramework>
 
-        <PackageId>Gateway.OpenTelemetry.Core</PackageId>
+        <PackageId>Gateway.OpenTelemetry.Yarp</PackageId>
 
-        <Title>Gateway.OpenTelemetry.Core</Title>
+        <Title>Gateway.OpenTelemetry.Yarp</Title>
 
         <Description>
-            Core abstractions, constants and shared infrastructure for Gateway.OpenTelemetry.
+            YARP integration for Gateway.OpenTelemetry. Adds reverse proxy route, cluster and destination metadata to OpenTelemetry Activities.
         </Description>
 
         <Authors>Booviper</Authors>
@@ -17,7 +17,7 @@
         <Company>Booviper</Company>
 
         <PackageTags>
-            opentelemetry;gateway;observability;tracing
+            opentelemetry;yarp;reverse-proxy;gateway;observability;tracing
         </PackageTags>
 
         <RepositoryUrl>
@@ -39,6 +39,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+
+        <ProjectReference Include="..\Gateway.OpenTelemetry.Core\Gateway.OpenTelemetry.Core.csproj" />
+
+        <ProjectReference Include="..\Gateway.OpenTelemetry.AspNetCore\Gateway.OpenTelemetry.AspNetCore.csproj" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <PackageReference Include="Yarp.ReverseProxy" />
 
         <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
 

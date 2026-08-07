@@ -1,6 +1,17 @@
 <Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/OpenTelemetry.Spike/OpenTelemetry.Spike.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/Gateway.OpenTelemetry.AspNetCore/Gateway.OpenTelemetry.AspNetCore.csproj" />
     <Project Path="src/Gateway.OpenTelemetry.Core/Gateway.OpenTelemetry.Core.csproj" />
+    <Project Path="src/Gateway.OpenTelemetry.Yarp/Gateway.OpenTelemetry.Yarp.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Gateway.OpenTelemetry.AspNetCore.UnitTests/Gateway.OpenTelemetry.AspNetCore.UnitTests.csproj" />
+    <Project Path="tests/Gateway.OpenTelemetry.Core.UnitTests/Gateway.OpenTelemetry.Core.UnitTests.csproj" />
+    <Project Path="tests/Gateway.OpenTelemetry.IntegrationHost/Gateway.OpenTelemetry.IntegrationHost.csproj" />
+    <Project Path="tests/Gateway.OpenTelemetry.IntegrationTests/Gateway.OpenTelemetry.IntegrationTests.csproj" />
+    <Project Path="tests/Gateway.OpenTelemetry.Yarp.UnitTests/Gateway.OpenTelemetry.Yarp.UnitTests.csproj" />
   </Folder>
 </Solution>

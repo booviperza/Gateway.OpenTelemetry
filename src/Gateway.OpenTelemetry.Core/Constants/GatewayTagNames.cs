@@ -1,25 +1,32 @@
 namespace Gateway.OpenTelemetry.Core.Constants;
 
 /// <summary>
-/// Gateway-specific OpenTelemetry tag names.
+/// Defines well-known OpenTelemetry tag names used by Gateway.OpenTelemetry.
 /// </summary>
 public static class GatewayTagNames
 {
-    public const string Route =
-        "gateway.route";
+    /// <summary>
+    /// Gateway host.
+    /// </summary>
+    public const string Host = "gateway.host";
 
-    public const string Cluster =
-        "gateway.cluster";
+    /// <summary>
+    /// Exception type.
+    /// </summary>
+    public const string ExceptionType = "gateway.exception.type";
 
-    public const string Destination =
-        "gateway.destination";
+    /// <summary>
+    /// YARP route identifier.
+    /// </summary>
+    public const string YarpRouteId = "gateway.yarp.route_id";
 
-    public const string Endpoint =
-        "gateway.endpoint";
+    /// <summary>
+    /// YARP cluster identifier.
+    /// </summary>
+    public const string YarpClusterId = "gateway.yarp.cluster_id";
 
-    public const string Proxy =
-        "gateway.proxy";
-
-    public const string Tenant =
-        "gateway.tenant";
+    /// <summary>
+    /// YARP destination identifier.
+    /// </summary>
+    public const string YarpDestinationId = "gateway.yarp.destination_id";
 }

@@ -1,18 +1,65 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-<ItemGroup>
+    <PropertyGroup>
 
-  <ProjectReference Include="..\Gateway.OpenTelemetry.Core\Gateway.OpenTelemetry.Core.csproj" />
+        <TargetFramework>net10.0</TargetFramework>
 
-</ItemGroup>
+        <PackageId>Gateway.OpenTelemetry.AspNetCore</PackageId>
 
-<ItemGroup>
+        <Title>Gateway.OpenTelemetry.AspNetCore</Title>
 
-  <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+        <Description>
+            ASP.NET Core integration for Gateway.OpenTelemetry. Provides automatic Activity enrichment through OpenTelemetry ASP.NET Core instrumentation.
+        </Description>
 
-  <PackageReference Include="OpenTelemetry.Api" />
+        <Authors>Booviper</Authors>
 
-  <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+        <Company>Booviper</Company>
 
-</ItemGroup>
+        <PackageTags>
+            opentelemetry;aspnetcore;gateway;observability;tracing
+        </PackageTags>
+
+        <RepositoryUrl>
+            https://github.com/booviperza/Gateway.OpenTelemetry
+        </RepositoryUrl>
+
+        <RepositoryType>git</RepositoryType>
+
+        <PackageProjectUrl>
+            https://github.com/booviperza/Gateway.OpenTelemetry
+        </PackageProjectUrl>
+
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+        <PackageIcon>icon.png</PackageIcon>
+
+    </PropertyGroup>
+
+    <ItemGroup>
+
+        <ProjectReference Include="..\Gateway.OpenTelemetry.Core\Gateway.OpenTelemetry.Core.csproj" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+
+        <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+
+    </ItemGroup>
+
 </Project>
