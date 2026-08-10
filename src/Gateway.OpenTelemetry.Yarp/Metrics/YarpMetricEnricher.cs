@@ -5,50 +5,56 @@ namespace Gateway.OpenTelemetry.Yarp.Metrics;
 /// <summary>
 /// Adds YARP-specific metric tags.
 /// </summary>
-internal sealed class YarpMetricEnricher : IMetricEnricher
+internal sealed class YarpMetricEnricher
+    : IMetricEnricher
 {
     public void Enrich(
         HttpContext httpContext,
-        TagList tags)
+        ICollection<KeyValuePair<string, object?>> tags)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
+        ArgumentNullException.ThrowIfNull(tags);
 
-        IReverseProxyFeature? feature =
-            httpContext.Features.Get<IReverseProxyFeature>();
+        IReverseProxyFeature? proxyFeature =
+            httpContext.Features
+                .Get<IReverseProxyFeature>();
 
-        if (feature is null)
+        if (proxyFeature is null)
         {
             return;
         }
 
         string? routeId =
-            feature.Route.Config.RouteId;
+            proxyFeature.Route?.Config?.RouteId;
 
         if (!string.IsNullOrWhiteSpace(routeId))
         {
             tags.Add(
-                GatewayTagNames.YarpRouteId,
-                routeId);
+                new KeyValuePair<string, object?>(
+                    "gateway.yarp.route_id",
+                    routeId));
         }
 
         string? clusterId =
-            feature.Cluster.Config.ClusterId;
+            proxyFeature.Cluster?.Config?.ClusterId;
 
         if (!string.IsNullOrWhiteSpace(clusterId))
         {
             tags.Add(
-                GatewayTagNames.YarpClusterId,
-                clusterId);
+                new KeyValuePair<string, object?>(
+                    "gateway.yarp.cluster_id",
+                    clusterId));
         }
 
         string? destinationId =
-            feature.ProxiedDestination?.DestinationId;
+            proxyFeature.ProxiedDestination?.DestinationId;
 
         if (!string.IsNullOrWhiteSpace(destinationId))
         {
             tags.Add(
-                GatewayTagNames.YarpDestinationId,
-                destinationId);
+                new KeyValuePair<string, object?>(
+                    "gateway.yarp.destination_id",
+                    destinationId));
         }
     }
 }

@@ -1,0 +1,32 @@
+using Gateway.OpenTelemetry.AspNetCore.Tracing;
+
+namespace Gateway.OpenTelemetry.AspNetCore.Options;
+
+/// <summary>
+/// Configures ASP.NET Core tracing instrumentation.
+/// </summary>
+internal sealed class ConfigureAspNetCoreTraceInstrumentationOptions
+    : IConfigureOptions<AspNetCoreTraceInstrumentationOptions>
+{
+    private readonly IEnumerable<ITraceEnricher> _enrichers;
+
+    public ConfigureAspNetCoreTraceInstrumentationOptions(
+        IEnumerable<ITraceEnricher> enrichers)
+    {
+        _enrichers = enrichers;
+    }
+
+    public void Configure(
+        AspNetCoreTraceInstrumentationOptions options)
+    {
+        options.EnrichWithHttpResponse = (activity, response) =>
+        {
+            var httpContext = response.HttpContext;
+
+            foreach (var enricher in _enrichers)
+            {
+                enricher.Enrich(httpContext, activity);
+            }
+        };
+    }
+}

@@ -1,22 +1,20 @@
 using Gateway.OpenTelemetry.AspNetCore.DependencyInjection;
-using Gateway.OpenTelemetry.AspNetCore.Metrics;
 using Gateway.OpenTelemetry.AspNetCore.Tracing;
+using Gateway.OpenTelemetry.Proxy.Tracing;
 
-using Gateway.OpenTelemetry.Yarp.Metrics;
-using Gateway.OpenTelemetry.Yarp.Tracing;
-
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Gateway.OpenTelemetry.Yarp.DependencyInjection;
+namespace Gateway.OpenTelemetry.Proxy.DependencyInjection;
 
 /// <summary>
 /// Provides extension methods for registering
-/// Gateway.OpenTelemetry YARP services.
+/// Gateway.OpenTelemetry proxy services.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Registers Gateway.OpenTelemetry YARP integration.
+    /// Registers Gateway.OpenTelemetry proxy integration.
     /// </summary>
     /// <param name="services">
     /// Service collection.
@@ -24,8 +22,8 @@ public static class ServiceCollectionExtensions
     /// <returns>
     /// The same service collection instance.
     /// </returns>
-    public static IServiceCollection AddGatewayYarpOpenTelemetry(
-    this IServiceCollection services)
+    public static IServiceCollection AddGatewayProxyOpenTelemetry(
+        this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);
 
@@ -34,14 +32,7 @@ public static class ServiceCollectionExtensions
         services.TryAddEnumerable(
             ServiceDescriptor.Singleton<
                 ITraceEnricher,
-                YarpTraceEnricher>());
-
-        services.TryAddSingleton<YarpMetricEnricher>();
-
-        services.TryAddEnumerable(
-            ServiceDescriptor.Singleton<
-                IMetricEnricher,
-                YarpMetricEnricher>());
+                ProxyTraceEnricher>());
 
         return services;
     }

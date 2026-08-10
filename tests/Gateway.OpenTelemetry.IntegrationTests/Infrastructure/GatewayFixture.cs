@@ -1,6 +1,9 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+
+using Xunit;
 
 namespace Gateway.OpenTelemetry.IntegrationTests.Infrastructure;
 
@@ -8,18 +11,11 @@ namespace Gateway.OpenTelemetry.IntegrationTests.Infrastructure;
 /// Shared fixture for Gateway integration tests.
 /// </summary>
 public sealed class GatewayFixture
-    : WebApplicationFactory<Program>
+    : WebApplicationFactory<Program>,
+      IAsyncLifetime
 {
     private BackendHost? _backendHost;
-    public GatewayFixture()
-    {
-        _backendHost = BackendHost
-            .StartAsync()
-            .GetAwaiter()
-            .GetResult();
 
-        Client = CreateClient();
-    }
     /// <summary>
     /// Gets the shared HTTP client.
     /// </summary>
@@ -30,14 +26,32 @@ public sealed class GatewayFixture
     /// </summary>
     internal ActivityCollector Collector { get; } = new();
 
-    /// <inheritdoc />
-    public override async ValueTask DisposeAsync()
+    /// <summary>
+    /// Gets collected HTTP metric tags.
+    /// </summary>
+    internal MetricTagsCollector MetricTags { get; } = new();
+
+    /// <summary>
+    /// Initializes the test gateway.
+    /// </summary>
+    public async Task InitializeAsync()
+    {
+        _backendHost = await BackendHost.StartAsync();
+
+        Client = CreateClient();
+    }
+
+    /// <summary>
+    /// Disposes test resources.
+    /// </summary>
+    public new async Task DisposeAsync()
     {
         Client?.Dispose();
 
         if (_backendHost is not null)
         {
             await _backendHost.DisposeAsync();
+            _backendHost = null;
         }
 
         await base.DisposeAsync();
@@ -47,6 +61,8 @@ public sealed class GatewayFixture
     protected override void ConfigureWebHost(
         IWebHostBuilder builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+
         builder.UseEnvironment("Development");
 
         builder.ConfigureAppConfiguration((_, configuration) =>
@@ -65,10 +81,34 @@ public sealed class GatewayFixture
             configuration.AddInMemoryCollection(settings);
         });
 
-        builder.ConfigureServices(_ =>
+        builder.ConfigureServices(services =>
         {
-            // STEP ถัดไป
-            // Inject TestActivityExporter
+            services
+                .AddOpenTelemetry()
+                .WithTracing(tracing =>
+                {
+                    tracing.AddTestExporter(Collector);
+                });
+
+            ServiceDescriptor? metricFilter =
+                services.FirstOrDefault(
+                    descriptor =>
+                        descriptor.ServiceType == typeof(IStartupFilter) &&
+                        descriptor.ImplementationType?.Name ==
+                            "MetricEnrichmentStartupFilter");
+
+            if (metricFilter is not null)
+            {
+                services.Remove(metricFilter);
+            }
+
+            services.AddSingleton<IStartupFilter>(
+                new MetricTagsCaptureStartupFilter(MetricTags));
+
+            if (metricFilter is not null)
+            {
+                services.Add(metricFilter);
+            }
         });
     }
 }

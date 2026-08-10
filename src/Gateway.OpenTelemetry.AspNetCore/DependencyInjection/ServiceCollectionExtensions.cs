@@ -1,5 +1,9 @@
+using Gateway.OpenTelemetry.AspNetCore.Metrics;
+using Gateway.OpenTelemetry.AspNetCore.Middleware;
 using Gateway.OpenTelemetry.AspNetCore.Options;
 using Gateway.OpenTelemetry.AspNetCore.Tracing;
+
+using Microsoft.AspNetCore.Hosting;
 
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -25,6 +29,11 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
+        // Tracing
+
+        services.TryAddSingleton<
+            CompositeTraceEnricher>();
+
         services.TryAddEnumerable(
             ServiceDescriptor.Singleton<
                 IConfigureOptions<AspNetCoreTraceInstrumentationOptions>,
@@ -35,8 +44,18 @@ public static class ServiceCollectionExtensions
                 ITraceEnricher,
                 ExceptionTraceEnricher>());
 
-        // Metrics registration will be added after the
-        // OpenTelemetry Metrics spike is completed.
+        // Metrics
+
+        services.TryAddSingleton<
+            CompositeMetricEnricher>();
+
+        services.TryAddSingleton<
+            MetricEnrichmentDispatcher>();
+
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<
+                IStartupFilter,
+                MetricEnrichmentStartupFilter>());
 
         return services;
     }

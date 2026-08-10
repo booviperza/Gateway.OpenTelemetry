@@ -9,7 +9,9 @@
         <Title>Gateway.OpenTelemetry.Yarp</Title>
 
         <Description>
-            YARP integration for Gateway.OpenTelemetry. Adds reverse proxy route, cluster and destination metadata to OpenTelemetry Activities.
+            YARP integration for Gateway.OpenTelemetry.
+            Adds reverse proxy route, cluster and destination metadata
+            to OpenTelemetry traces and ASP.NET Core HTTP metrics.
         </Description>
 
         <Authors>Booviper</Authors>
@@ -17,7 +19,7 @@
         <Company>Booviper</Company>
 
         <PackageTags>
-            opentelemetry;yarp;reverse-proxy;gateway;observability;tracing
+            opentelemetry;yarp;reverse-proxy;gateway;observability;tracing;metrics;aspnetcore
         </PackageTags>
 
         <RepositoryUrl>

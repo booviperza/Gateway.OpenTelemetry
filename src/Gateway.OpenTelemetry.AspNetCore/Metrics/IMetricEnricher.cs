@@ -1,23 +1,22 @@
 using Microsoft.AspNetCore.Http;
-using System.Diagnostics;
 
 namespace Gateway.OpenTelemetry.AspNetCore.Metrics;
 
 /// <summary>
-/// Enriches ASP.NET Core metric tags.
+/// Enriches ASP.NET Core HTTP metric tags.
 /// </summary>
 public interface IMetricEnricher
 {
     /// <summary>
-    /// Enriches metric tags.
+    /// Enriches metric tags for the current HTTP request.
     /// </summary>
     /// <param name="httpContext">
-    /// Current HTTP request context.
+    /// Current HTTP context.
     /// </param>
     /// <param name="tags">
-    /// Metric tags.
+    /// HTTP metric tags.
     /// </param>
     void Enrich(
         HttpContext httpContext,
-        TagList tags);
+        ICollection<KeyValuePair<string, object?>> tags);
 }

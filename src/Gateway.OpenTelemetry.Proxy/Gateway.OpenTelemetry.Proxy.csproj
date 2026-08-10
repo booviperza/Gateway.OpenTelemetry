@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <TargetFramework>net10.0</TargetFramework>
+
+    <Nullable>enable</Nullable>
+
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <PackageId>Gateway.OpenTelemetry.Proxy</PackageId>
+
+    <Title>Gateway.OpenTelemetry.Proxy</Title>
+
+    <Description>
+      OpenTelemetry enrichment library for custom reverse proxy implementations.
+    </Description>
+
+    <PackageTags>
+      OpenTelemetry;Tracing;Proxy;Gateway;ReverseProxy;Observability
+    </PackageTags>
+
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <PackageIcon>icon.png</PackageIcon>
+
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\Gateway.OpenTelemetry.Core\Gateway.OpenTelemetry.Core.csproj" />
+
+    <ProjectReference Include="..\Gateway.OpenTelemetry.AspNetCore\Gateway.OpenTelemetry.AspNetCore.csproj" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+
+    <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+
+  </ItemGroup>
+
+</Project>

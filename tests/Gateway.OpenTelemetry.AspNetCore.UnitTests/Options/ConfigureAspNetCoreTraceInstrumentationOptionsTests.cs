@@ -29,7 +29,15 @@ public sealed class ConfigureAspNetCoreTraceInstrumentationOptionsTests
 
         AspNetCoreTraceInstrumentationOptions options = new();
 
-        ConfigureAspNetCoreTraceInstrumentationOptions configure = new();
+        //var compositeTraceEnricher = new CompositeTraceEnricher(Array.Empty<ITraceEnricher>());
+        var compositeTraceEnricher =
+            new CompositeTraceEnricher(
+                new[]
+                {
+                    fake
+                });
+
+        ConfigureAspNetCoreTraceInstrumentationOptions configure = new ConfigureAspNetCoreTraceInstrumentationOptions(compositeTraceEnricher);
 
         configure.Configure(options);
 

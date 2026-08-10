@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http;
-using System.Diagnostics;
 
 namespace Gateway.OpenTelemetry.AspNetCore.Metrics;
 
@@ -20,13 +19,16 @@ internal sealed class CompositeMetricEnricher
 
     public void Enrich(
         HttpContext httpContext,
-        TagList tags)
+        ICollection<KeyValuePair<string, object?>> tags)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
+        ArgumentNullException.ThrowIfNull(tags);
 
         foreach (IMetricEnricher enricher in _enrichers)
         {
-            enricher.Enrich(httpContext, tags);
+            enricher.Enrich(
+                httpContext,
+                tags);
         }
     }
 }

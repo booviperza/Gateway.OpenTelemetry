@@ -1,6 +1,6 @@
 using Gateway.OpenTelemetry.AspNetCore.DependencyInjection;
 using Gateway.OpenTelemetry.Yarp.DependencyInjection;
-
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -16,6 +16,14 @@ builder.Services
     {
         tracing
             .AddAspNetCoreInstrumentation();
+    })
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddMeter(
+                "Microsoft.AspNetCore.Hosting",
+                "Microsoft.AspNetCore.Server.Kestrel")
+            .AddConsoleExporter();
     });
 
 builder.Services
