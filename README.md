@@ -1,278 +1,163 @@
 # Gateway.OpenTelemetry
 
-Lightweight OpenTelemetry extensions for ASP.NET Core and YARP.
+Lightweight OpenTelemetry extensions for ASP.NET Core, YARP, and gateway/proxy applications.
 
-Designed for modern API Gateways and reverse proxy applications.
-
-> Extend OpenTelemetry with gateway-aware Activity enrichment while keeping your application lightweight, maintainable, and production-ready.
-
----
-
-## Table of Contents
-
-- [Why Gateway.OpenTelemetry?](#why-gatewayopentelemetry)
-- [Features](#features)
-- [Packages](#packages)
-- [Package Selection Guide](#package-selection-guide)
-- [Architecture](#architecture)
-- [Installation](#installation)
-- [Requirements](#requirements)
-- [Quick Start](#quick-start)
-- [Exporting Traces](#exporting-traces)
-- [What Gets Added?](#what-gets-added)
-- [Built-in Activity Tags](#built-in-activity-tags)
-- [ASP.NET Core Integration](#aspnet-core-integration)
-- [YARP Integration](#yarp-integration)
-- [Example Configuration](#example-configuration)
-- [Design Philosophy](#design-philosophy)
-- [Dependency Injection](#dependency-injection)
-- [Custom Trace Enrichers](#custom-trace-enrichers)
-- [Public API Reference](#public-api-reference)
-- [Package Dependencies](#package-dependencies)
-- [Performance](#performance)
-- [Thread Safety](#thread-safety)
-- [Best Practices](#best-practices)
-- [Troubleshooting](#troubleshooting)
-- [FAQ](#faq)
-- [Version Compatibility](#version-compatibility)
-- [Sample Project](#sample-project)
-- [Building from Source](#building-from-source)
-- [Running Tests](#running-tests)
-- [Repository Structure](#repository-structure)
-- [Repository Standards](#repository-standards)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-- [Support](#support)
-- [Acknowledgements](#acknowledgements)
----
-
-## Why Gateway.OpenTelemetry?
-
-OpenTelemetry provides excellent instrumentation for ASP.NET Core, but gateway applications often require additional context that is not available out of the box.
-
-For example:
-
-- Which YARP Route handled the request?
-- Which Cluster processed the request?
-- Which Destination was selected?
-- Which ASP.NET Core Endpoint handled the request?
-- Which Exception Type caused the failure?
-
-Gateway.OpenTelemetry automatically enriches tracing Activities with this information.
-
----
+Gateway.OpenTelemetry enriches telemetry already produced by OpenTelemetry with gateway-specific metadata. It supports both tracing and ASP.NET Core HTTP metrics.
 
 ## Features
 
-- Lightweight and dependency-friendly
-- Built on top of OpenTelemetry
-- ASP.NET Core Activity enrichment
-- YARP Activity enrichment
-- Dependency Injection friendly
-- No reflection
-- No runtime code generation
-- Minimal allocations
-- Production-ready architecture
-- Unit tested
-- Integration tested
-
----
+- ASP.NET Core trace enrichment
+- YARP trace enrichment
+- ASP.NET Core HTTP metric enrichment
+- YARP metric enrichment
+- Gateway route, cluster, and destination metadata
+- Dependency Injection integration
+- No reflection or runtime code generation
+- Stateless built-in enrichers
+- Unit, integration, and package smoke tests
 
 ## Packages
 
-Gateway.OpenTelemetry consists of three packages.
+| Package | Purpose |
+|---|---|
+| `Gateway.OpenTelemetry.Core` | Shared abstractions, constants, and common infrastructure. |
+| `Gateway.OpenTelemetry.AspNetCore` | ASP.NET Core tracing and HTTP metrics integration. |
+| `Gateway.OpenTelemetry.Yarp` | YARP-specific tracing and metric enrichment. |
+| `Gateway.OpenTelemetry.Proxy` | Proxy telemetry abstractions and proxy-facing telemetry features. |
 
-| Package | Description |
-|----------|-------------|
-| **Gateway.OpenTelemetry.Core** | Shared abstractions, constants and common infrastructure. |
-| **Gateway.OpenTelemetry.AspNetCore** | ASP.NET Core Activity enrichment. |
-| **Gateway.OpenTelemetry.Yarp** | YARP-specific Activity enrichment. |
-
-Dependency hierarchy:
-
-```
-Gateway.OpenTelemetry.Yarp
-            │
-            ▼
-Gateway.OpenTelemetry.AspNetCore
-            │
-            ▼
-Gateway.OpenTelemetry.Core
-```
----
-
-## Package Selection Guide
-
-Choose the package that matches your application's requirements.
-
-| Scenario | Recommended Package |
-|----------|---------------------|
-| ASP.NET Core application | Gateway.OpenTelemetry.AspNetCore |
-| YARP reverse proxy | Gateway.OpenTelemetry.Yarp |
-| Shared library | Gateway.OpenTelemetry.Core |
-
-Because the packages are layered, installing `Gateway.OpenTelemetry.Yarp` automatically includes the ASP.NET Core integration.
----
-
-## Architecture
-
-```
-                ASP.NET Core Request
-                        │
-                        ▼
-        AddAspNetCoreInstrumentation()
-                        │
-                        ▼
-       Gateway.OpenTelemetry.AspNetCore
-        ├───────────────────────────────┐
-        │                               │
-        ▼                               ▼
-EndpointTraceEnricher        ExceptionTraceEnricher
-        │                               │
-        └───────────────┬───────────────┘
-                        ▼
-               ITraceEnricher Pipeline
-                        │
-                        ▼
-          Gateway.OpenTelemetry.Yarp
-                        │
-                        ▼
-               YarpTraceEnricher
-                        │
-                        ▼
-                 Activity.SetTag(...)
-                        │
-                        ▼
-             OpenTelemetry Exporters
-```
-
-
-```
-                  +-------------------------+
-                  |     Client Request      |
-                  +------------+------------+
-                               |
-                               v
-                    ASP.NET Core Pipeline
-                               |
-                               v
-             OpenTelemetry ASP.NET Core Instrumentation
-                               |
-                               v
-        +-----------------------------------------------+
-        |        Gateway.OpenTelemetry.AspNetCore        |
-        |-----------------------------------------------|
-        | EndpointTraceEnricher                         |
-        | ExceptionTraceEnricher                        |
-        +----------------------+------------------------+
-                               |
-                               v
-                  Gateway.OpenTelemetry.Yarp
-                               |
-                               v
-                      Activity Enrichment
-                               |
-                               v
-                     OpenTelemetry Exporter
-                               |
-      +-----------+------------+-------------+
-      |           |                          |
-      v           v                          v
-     OTLP      Jaeger                    Zipkin
-```
-
-The architecture intentionally separates responsibilities into independent libraries.
-
-- **Core** contains reusable abstractions.
-- **AspNetCore** contains HTTP-specific enrichers.
-- **Yarp** adds reverse proxy metadata.
-
-This layered design keeps dependencies clean and avoids circular references.
-
----
-
-## Installation
-
-Install the required packages.
-
-### ASP.NET Core
-
-```bash
-dotnet add package Gateway.OpenTelemetry.AspNetCore
-```
-
-### YARP
-
-```bash
-dotnet add package Gateway.OpenTelemetry.Yarp
-```
-
----
+For a YARP gateway, install `Gateway.OpenTelemetry.Yarp`; its NuGet dependencies bring the required Gateway.OpenTelemetry ASP.NET Core/Core packages.
 
 ## Requirements
 
 | Component | Version |
-|-----------|---------|
+|---|---|
 | .NET | 10.0 |
 | OpenTelemetry | 1.17+ |
 | YARP | 2.3+ |
 
----
+Current packages target `net10.0`.
+
+## Installation
+
+### YARP
+
+```bash
+dotnet add package Gateway.OpenTelemetry.Yarp --version 1.0.0
+```
+
+### ASP.NET Core only
+
+```bash
+dotnet add package Gateway.OpenTelemetry.AspNetCore --version 1.0.0
+```
+
+### Proxy
+
+```bash
+dotnet add package Gateway.OpenTelemetry.Proxy --version 1.0.0
+```
 
 ## Quick Start
 
-Register OpenTelemetry.
-
 ```csharp
+using Gateway.OpenTelemetry.AspNetCore.DependencyInjection;
+using Gateway.OpenTelemetry.Yarp;
+using Gateway.OpenTelemetry.Yarp.DependencyInjection;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services
+    .AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
+builder.Services.AddGatewayOpenTelemetry();
+builder.Services.AddGatewayYarpOpenTelemetry();
+
 builder.Services
     .AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        metrics.AddAspNetCoreInstrumentation();
+    })
     .WithTracing(tracing =>
     {
         tracing.AddAspNetCoreInstrumentation();
     });
-```
 
-Register Gateway.OpenTelemetry.
+var app = builder.Build();
 
-```csharp
-builder.Services
-    .AddGatewayOpenTelemetry();
-
-builder.Services
-    .AddGatewayYarpOpenTelemetry();
-```
-
-Register YARP.
-
-```csharp
-builder.Services
-    .AddReverseProxy()
-    .LoadFromConfig(
-        builder.Configuration.GetSection("ReverseProxy"));
-```
-
-Build the application.
-
-```csharp
-WebApplication app = builder.Build();
-
-app.MapReverseProxy();
+app.MapGatewayReverseProxy();
 
 app.Run();
 ```
 
-That's it.
+The application remains responsible for configuring OpenTelemetry exporters.
 
-Every request will automatically be enriched with additional gateway-related tracing information.
+## Architecture
 
-## Exporting Traces
+### Tracing
 
-Gateway.OpenTelemetry enriches Activities but does not include an exporter.
+```text
+HTTP Request
+    |
+    v
+ASP.NET Core OpenTelemetry Instrumentation
+    |
+    v
+Gateway.OpenTelemetry.AspNetCore
+    |
+    v
+CompositeTraceEnricher
+    |
+    v
+Gateway.OpenTelemetry.Yarp / YarpTraceEnricher
+    |
+    v
+Activity.SetTag(...)
+    |
+    v
+OpenTelemetry Exporter
+```
 
-Choose the exporter that best fits your environment.
+Gateway.OpenTelemetry enriches the existing request `Activity`; it does not create a second server Activity solely for enrichment.
 
-### OTLP Exporter
+### Metrics
+
+```text
+HTTP Request
+    |
+    v
+ASP.NET Core HTTP Metrics
+    |
+    v
+IHttpMetricsTagsFeature
+    |
+    v
+MetricEnrichmentMiddleware
+    |
+    v
+MetricEnrichmentDispatcher
+    |
+    v
+CompositeMetricEnricher
+    |
+    v
+YarpMetricEnricher
+    |
+    v
+ASP.NET Core metric tags
+    |
+    v
+OpenTelemetry Metrics / Exporter
+```
+
+The YARP metric enricher adds gateway metadata to the ASP.NET Core HTTP metrics feature.
+
+## OpenTelemetry Configuration
+
+### Tracing
 
 ```csharp
 builder.Services
@@ -285,227 +170,105 @@ builder.Services
     });
 ```
 
-### Console Exporter
+Use the exporter appropriate for your environment.
+
+### Metrics
 
 ```csharp
 builder.Services
     .AddOpenTelemetry()
-    .WithTracing(tracing =>
+    .WithMetrics(metrics =>
     {
-        tracing
-            .AddAspNetCoreInstrumentation()
-            .AddConsoleExporter();
+        metrics.AddAspNetCoreInstrumentation();
     });
 ```
 
-Any OpenTelemetry-compatible exporter can be used, including:
+### Prometheus
 
-- OTLP
-- Jaeger
-- Zipkin
-- Azure Monitor
-- Grafana Tempo
-- Elastic APM
----
+With the OpenTelemetry Prometheus exporter configured in the application:
 
-## What Gets Added?
+```csharp
+builder.Services
+    .AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        metrics
+            .AddAspNetCoreInstrumentation()
+            .AddPrometheusExporter();
+    });
 
-Gateway.OpenTelemetry enriches the current Activity with additional tags.
-
-For ASP.NET Core:
-
-- Endpoint display name
-- Host information
-- Exception type
-
-For YARP:
-
-- Route ID
-- Cluster ID
-- Destination ID
-
-These tags become available to any OpenTelemetry exporter such as:
-
-- OTLP
-- Jaeger
-- Zipkin
-- Azure Monitor
-- Grafana Tempo
-- Elastic APM
-
-without requiring additional configuration.
-
-## Built-in Activity Tags
-
-Gateway.OpenTelemetry automatically enriches the current `System.Diagnostics.Activity` with additional metadata.
-
-These tags are added during request processing and become available to any OpenTelemetry exporter.
-
-## ASP.NET Core Tags
-
-| Tag | Description | Example |
-|-----|-------------|---------|
-| `gateway.host` | Request host name. | `api.example.com` |
-| `gateway.endpoint.display_name` | ASP.NET Core endpoint display name. | `GET /orders/{id}` |
-| `gateway.exception.type` | Exception type when a request fails. | `System.InvalidOperationException` |
-
----
-
-## YARP Tags
-
-| Tag | Description | Example |
-|-----|-------------|---------|
-| `gateway.yarp.route_id` | Matched YARP Route ID. | `api-route` |
-| `gateway.yarp.cluster_id` | Selected Cluster ID. | `backend-cluster` |
-| `gateway.yarp.destination_id` | Selected Destination ID. | `destination-01` |
-
----
-
-## Example Activity
-
-```
-Activity
-
-Name:
-HTTP GET
-
-Tags
-
-http.method = GET
-
-http.route = /api/orders/{id}
-
-gateway.host = api.company.com
-
-gateway.endpoint.display_name = GET /api/orders/{id}
-
-gateway.yarp.route_id = orders
-
-gateway.yarp.cluster_id = orders-cluster
-
-gateway.yarp.destination_id = orders-node-02
+app.MapPrometheusScrapingEndpoint();
 ```
 
----
-## Example Trace
+## Gateway Trace Tags
 
-The following example shows how an enriched Activity may appear after passing through the gateway.
+### ASP.NET Core
+
+| Tag | Description |
+|---|---|
+| `gateway.host` | Request host information. |
+| `gateway.endpoint.display_name` | ASP.NET Core endpoint display name. |
+| `gateway.exception.type` | Exception type when available. |
+
+### YARP
+
+| Tag | Description |
+|---|---|
+| `gateway.yarp.route_id` | Matched YARP route ID. |
+| `gateway.yarp.cluster_id` | Selected YARP cluster ID. |
+| `gateway.yarp.destination_id` | Selected YARP destination ID. |
+
+## Gateway Metric Tags
+
+YARP metric enrichment adds the following attributes to ASP.NET Core HTTP metrics such as `http.server.request.duration`:
+
+| Attribute | Description |
+|---|---|
+| `gateway.yarp.route_id` | Matched YARP route ID. |
+| `gateway.yarp.cluster_id` | Selected YARP cluster ID. |
+| `gateway.yarp.destination_id` | Selected YARP destination ID. |
+
+Example exported metric:
 
 ```text
-Activity
+http.server.request.duration
 
-DisplayName
-HTTP GET
-
-Duration
-34 ms
-
-Tags
-
-http.method = GET
-
-http.route = /api/orders/{id}
-
-server.address = api.company.com
-
-gateway.host = api.company.com
-
-gateway.endpoint.display_name = GET /api/orders/{id}
-
-gateway.yarp.route_id = orders
-
-gateway.yarp.cluster_id = orders-cluster
-
-gateway.yarp.destination_id = node-02
+http.request.method = GET
+http.response.status_code = 200
+http.route = /proxy/{**catch-all}
+gateway.yarp.route_id = smoke-route
+gateway.yarp.cluster_id = smoke-cluster
+gateway.yarp.destination_id = smoke-backend
 ```
 
-The exact output depends on the configured OpenTelemetry exporter.
-
----
-
-## ASP.NET Core Integration
-
-Gateway.OpenTelemetry extends the existing ASP.NET Core OpenTelemetry instrumentation.
-
-It does **not** replace the built-in instrumentation.
-
-Instead, it enriches the current Activity with additional gateway-specific metadata.
-
-```
-ASP.NET Core Request
-
-        │
-
-        ▼
-
-OpenTelemetry ASP.NET Core Instrumentation
-
-        │
-
-        ▼
-
-Gateway.OpenTelemetry.AspNetCore
-
-        │
-
-        ▼
-
-Additional Activity Tags
-```
-
-Because Gateway.OpenTelemetry works on top of the existing instrumentation pipeline, it remains fully compatible with any OpenTelemetry exporter.
-
-No exporter-specific configuration is required.
-
----
+These are attributes on the existing HTTP metric, not a separate custom metric.
 
 ## YARP Integration
 
-Gateway.OpenTelemetry.Yarp enriches requests handled by YARP.
+Register YARP normally:
 
-When a request is successfully matched by the reverse proxy, the library automatically records:
-
-- Route ID
-- Cluster ID
-- Destination ID
-
-Example
-
-```
-Incoming Request
-
-        │
-
-        ▼
-
-YARP Route
-
-        │
-
-        ▼
-
-Cluster
-
-        │
-
-        ▼
-
-Destination
-
-        │
-
-        ▼
-
-Activity Tags
+```csharp
+builder.Services
+    .AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 ```
 
-If the request is **not** processed by YARP, no YARP tags are added.
+Register Gateway.OpenTelemetry:
 
-This behavior avoids polluting Activities with empty or meaningless values.
+```csharp
+builder.Services.AddGatewayOpenTelemetry();
+builder.Services.AddGatewayYarpOpenTelemetry();
+```
 
-## Example Configuration
+Map the gateway endpoint:
 
-The following example demonstrates a minimal YARP configuration.
+```csharp
+app.MapGatewayReverseProxy();
+```
+
+The application should not directly instantiate internal enrichers such as `YarpMetricEnricher`, `YarpTraceEnricher`, `MetricEnrichmentDispatcher`, or `CompositeMetricEnricher`.
+
+## Example YARP Configuration
 
 ```json
 {
@@ -522,7 +285,7 @@ The following example demonstrates a minimal YARP configuration.
       "backend": {
         "Destinations": {
           "node1": {
-            "Address": "https://localhost:5001"
+            "Address": "http://localhost:5001/"
           }
         }
       }
@@ -531,111 +294,56 @@ The following example demonstrates a minimal YARP configuration.
 }
 ```
 
-When a request matches this route, Gateway.OpenTelemetry automatically enriches the current Activity with:
+A matching request can produce:
 
-- `gateway.yarp.route_id`
-- `gateway.yarp.cluster_id`
-- `gateway.yarp.destination_id`
----
+```text
+gateway.yarp.route_id = api
+gateway.yarp.cluster_id = backend
+gateway.yarp.destination_id = node1
+```
+
+## Proxy Telemetry
+
+`Gateway.OpenTelemetry.Proxy` exposes the public proxy telemetry feature:
+
+```csharp
+Gateway.OpenTelemetry.Proxy.Features.IProxyTelemetryFeature
+```
+
+The feature provides proxy telemetry information for the current request, including:
+
+```text
+RouteId
+RoutePattern
+Upstream
+ClientId
+CorrelationId
+CertificateId
+Timeout
+ProxyName
+```
+
+Application code should consume the public feature rather than depend on internal proxy implementation types.
 
 ## Dependency Injection
 
-Gateway.OpenTelemetry integrates with the standard Microsoft dependency injection container.
-
-Registration is straightforward.
+ASP.NET Core integration:
 
 ```csharp
-builder.Services
-    .AddGatewayOpenTelemetry();
-
-builder.Services
-    .AddGatewayYarpOpenTelemetry();
+builder.Services.AddGatewayOpenTelemetry();
 ```
 
-No manual service registration is required.
+YARP integration:
 
----
-
-## Design Philosophy
-
-Gateway.OpenTelemetry follows several design principles.
-
-## Small Public API
-
-Only a minimal set of public APIs is exposed.
-
-This keeps the library easy to understand and minimizes future breaking changes.
-
----
-
-## Layered Architecture
-
-```
-Core
-
-▲
-
-AspNetCore
-
-▲
-
-Yarp
+```csharp
+builder.Services.AddGatewayYarpOpenTelemetry();
 ```
 
-Each package depends only on the layer below it.
-
-No circular dependencies exist.
-
----
-
-## OpenTelemetry First
-
-Gateway.OpenTelemetry is **not** an alternative tracing framework.
-
-Instead, it extends the official OpenTelemetry SDK.
-
-This means:
-
-- Existing exporters continue to work.
-- Existing instrumentation continues to work.
-- Existing Activity pipelines continue to work.
-
----
-
-## Zero Reflection
-
-The library does not use reflection.
-
-Benefits include:
-
-- Faster startup
-- Better Native AOT compatibility
-- Lower memory usage
-- Easier debugging
-
----
-
-## Dependency Injection Friendly
-
-All enrichers are resolved through dependency injection.
-
-This allows applications to:
-
-- replace implementations
-- register additional enrichers
-- customize behavior
-
-without modifying the library itself.
-
----
+Built-in enrichers are registered by the integration packages.
 
 ## Custom Trace Enrichers
 
-Gateway.OpenTelemetry is designed to be extensible.
-
-Applications can provide their own implementations of `ITraceEnricher`.
-
-Example:
+Applications can register additional implementations of `ITraceEnricher`:
 
 ```csharp
 public sealed class UserTraceEnricher : ITraceEnricher
@@ -651,398 +359,266 @@ public sealed class UserTraceEnricher : ITraceEnricher
 }
 ```
 
-Register your enricher.
+Register it through dependency injection:
 
 ```csharp
 builder.Services.AddSingleton<ITraceEnricher, UserTraceEnricher>();
 ```
 
-All registered enrichers are executed automatically.
+Keep custom enrichers lightweight because they execute during request telemetry processing.
 
----
+## Public API
 
-## Public API Reference
+The primary public integration surface is:
 
-## Extension Methods
+```text
+AddGatewayOpenTelemetry()
+AddGatewayYarpOpenTelemetry()
+MapGatewayReverseProxy()
+IProxyTelemetryFeature
+```
 
-### AddGatewayOpenTelemetry()
-
-Registers ASP.NET Core Activity enrichers.
-
-### AddGatewayYarpOpenTelemetry()
-
-Registers YARP Activity enrichers.
-
----
-
-## Interfaces
-
-### ITraceEnricher
-
-Represents a component capable of enriching the current Activity.
-
----
-
-## Constants
-
-### GatewayTagNames
-
-Provides the built-in Activity tag names used throughout the library.
----
+Shared trace enrichment abstractions and constants are provided by the Core package.
 
 ## Package Dependencies
 
+The current YARP package has these package dependencies:
+
+```text
+Gateway.OpenTelemetry.AspNetCore  1.0.0
+Gateway.OpenTelemetry.Core        1.0.0
+Yarp.ReverseProxy                 2.3.0
 ```
+
+Conceptually:
+
+```text
 Gateway.OpenTelemetry.Yarp
-
-        │
-
-        ▼
-
-Gateway.OpenTelemetry.AspNetCore
-
-        │
-
-        ▼
-
-Gateway.OpenTelemetry.Core
-
-        │
-
-        ▼
-
-OpenTelemetry
+    |
+    +--> Gateway.OpenTelemetry.AspNetCore
+    |         |
+    |         +--> Gateway.OpenTelemetry.Core
+    |
+    +--> Yarp.ReverseProxy
 ```
-
-Keeping packages separated allows applications to reference only what they need.
-
-For example:
-
-- ASP.NET Core applications only require `Gateway.OpenTelemetry.AspNetCore`.
-- Gateway applications can additionally reference `Gateway.OpenTelemetry.Yarp`.
-
-This reduces unnecessary dependencies.
 
 ## Performance
 
-Gateway.OpenTelemetry is designed to add gateway-specific tracing information with minimal overhead.
+The implementation is designed to keep the enrichment path lightweight. It currently:
 
-## Design Goals
+- Does not use reflection.
+- Does not use runtime code generation.
+- Uses dependency injection.
+- Uses stateless built-in enrichers.
+- Enriches the existing `Activity` for tracing.
+- Adds YARP attributes to the existing ASP.NET Core HTTP metrics feature.
+- Does not create a separate custom metric for each YARP request.
 
-- Minimal memory allocations
-- No reflection
-- No runtime code generation
-- Dependency Injection friendly
-- Compatible with OpenTelemetry SDK
-- Suitable for high-throughput gateway applications
-
-The library enriches the current `Activity` only and does not create additional Activities.
-
----
+Actual performance depends on request volume, telemetry configuration, sampling, and exporter behavior.
 
 ## Thread Safety
 
-All built-in enrichers are stateless.
-
-This means:
-
-- No shared mutable state
-- Safe for concurrent requests
-- Suitable for singleton registration
-
-Applications should follow the same guideline when implementing custom enrichers.
-
----
+Built-in enrichers are designed to be stateless and safe for concurrent request processing. Custom enrichers should avoid shared mutable state or protect it appropriately.
 
 ## Best Practices
 
-## Register OpenTelemetry First
-
-Always configure OpenTelemetry before registering Gateway.OpenTelemetry.
-
-```csharp
-builder.Services
-    .AddOpenTelemetry()
-    .WithTracing(tracing =>
-    {
-        tracing.AddAspNetCoreInstrumentation();
-    });
-
-builder.Services
-    .AddGatewayOpenTelemetry();
-
-builder.Services
-    .AddGatewayYarpOpenTelemetry();
-```
-
----
-
-## Register YARP Before Building the Application
-
-```csharp
-builder.Services
-    .AddReverseProxy()
-    .LoadFromConfig(
-        builder.Configuration.GetSection("ReverseProxy"));
-```
-
----
-
-## Avoid Manual Activity Creation
-
-Gateway.OpenTelemetry enriches the Activity created by ASP.NET Core instrumentation.
-
-Creating additional Activities for incoming HTTP requests is generally unnecessary.
-
----
-
-## Keep Custom Enrichers Lightweight
-
-Custom enrichers execute for every request.
-
-Avoid:
-
-- Blocking I/O
-- Database queries
-- Network calls
-- Long-running computations
-
-Instead, only enrich the Activity with information already available in the current request.
-
----
+1. Configure ASP.NET Core OpenTelemetry instrumentation.
+2. Register `AddGatewayOpenTelemetry()`.
+3. Register `AddGatewayYarpOpenTelemetry()` for YARP.
+4. Configure exporters in the host application.
+5. Use `MapGatewayReverseProxy()` for the Gateway YARP endpoint.
+6. Keep custom enrichers lightweight.
+7. Avoid blocking I/O, database calls, and network calls inside enrichers.
+8. Avoid creating an additional server Activity solely for gateway enrichment.
 
 ## Troubleshooting
 
-## No Gateway Tags
+### No Gateway Trace Tags
 
-Possible causes:
+Check:
 
-- `AddGatewayOpenTelemetry()` was not registered.
-- `AddAspNetCoreInstrumentation()` is missing.
-- The request did not reach ASP.NET Core.
+- `AddGatewayOpenTelemetry()` is registered.
+- `AddAspNetCoreInstrumentation()` is registered for tracing.
+- The request reaches the ASP.NET Core application.
+- The request is not excluded by application telemetry configuration.
 
----
+### No YARP Trace Tags
 
-## No YARP Tags
+Check:
 
-Possible causes:
+- `AddGatewayYarpOpenTelemetry()` is registered.
+- The request is handled by YARP.
+- A YARP route matches the request.
+- A cluster/destination is selected.
 
-- The request was not handled by YARP.
-- `AddGatewayYarpOpenTelemetry()` was not registered.
-- No matching route was found.
+### No Gateway Metric Tags
 
----
+Check:
 
-## No Exported Traces
+- `AddGatewayOpenTelemetry()` is registered.
+- `AddGatewayYarpOpenTelemetry()` is registered.
+- `AddAspNetCoreInstrumentation()` is registered for metrics.
+- HTTP metrics are enabled.
+- The request is handled by YARP.
 
-Verify that:
+Expected YARP metric attributes:
 
-- OpenTelemetry is configured correctly.
-- An exporter has been registered.
-- Sampling is enabled.
-- The exporter endpoint is reachable.
+```text
+gateway.yarp.route_id
+gateway.yarp.cluster_id
+gateway.yarp.destination_id
+```
 
----
+### No Exported Metrics
+
+Check that a metrics exporter is registered and its endpoint is reachable. For Prometheus, verify that the scraping endpoint is mapped and reachable.
+
+### No Exported Traces
+
+Check that a tracing exporter is registered, its endpoint is reachable, and sampling allows the trace to be exported.
+
+### `MapGatewayReverseProxy()` Not Found
+
+Ensure the YARP package is referenced and import:
+
+```csharp
+using Gateway.OpenTelemetry.Yarp;
+```
 
 ## Version Compatibility
 
 | Gateway.OpenTelemetry | .NET | OpenTelemetry | YARP |
-|-----------------------|------|---------------|------|
+|---|---|---|---|
 | 1.x | .NET 10 | 1.17+ | 2.3+ |
-
----
 
 ## Sample Project
 
-A sample application is included in the repository.
+The repository contains:
 
+```text
+samples/OpenTelemetry.Spike
 ```
-samples/
-└── OpenTelemetry.Spike
-```
 
-The sample demonstrates:
-
-- ASP.NET Core integration
-- YARP integration
-- OpenTelemetry configuration
-- End-to-end request tracing
-
----
+The sample is intended for OpenTelemetry experimentation. Integration infrastructure is provided separately under `tests`.
 
 ## Building from Source
 
-Clone the repository.
-
 ```bash
 git clone https://github.com/booviperza/Gateway.OpenTelemetry.git
-
 cd Gateway.OpenTelemetry
+dotnet build -warnaserror
 ```
-
-Build the solution.
-
-```bash
-dotnet build
-```
-
----
 
 ## Running Tests
 
-Run all tests.
+Run the complete test suite:
 
 ```bash
 dotnet test
 ```
 
-Run a specific project.
+Individual test projects:
 
 ```bash
 dotnet test tests/Gateway.OpenTelemetry.Core.UnitTests
-
 dotnet test tests/Gateway.OpenTelemetry.AspNetCore.UnitTests
-
 dotnet test tests/Gateway.OpenTelemetry.Yarp.UnitTests
-
+dotnet test tests/Gateway.OpenTelemetry.Proxy.UnitTests
 dotnet test tests/Gateway.OpenTelemetry.IntegrationTests
 ```
 
----
+## Package Smoke Test
+
+The repository also validates the generated NuGet artifacts through a package consumer. The smoke-test flow verifies that:
+
+1. The NuGet package can be restored from a local package source.
+2. A consuming YARP application builds successfully.
+3. YARP routes a request to a backend.
+4. Gateway metric enrichment is present in the resulting HTTP metrics.
+
+A successful result contains:
+
+```text
+gateway.yarp.route_id
+gateway.yarp.cluster_id
+gateway.yarp.destination_id
+```
+
+This verifies the packaged artifact rather than only the source project.
 
 ## Repository Structure
 
-```
+```text
 Gateway.OpenTelemetry
-
-├── src
-│   ├── Gateway.OpenTelemetry.Core
-│   ├── Gateway.OpenTelemetry.AspNetCore
-│   └── Gateway.OpenTelemetry.Yarp
-│
-├── tests
-│   ├── Gateway.OpenTelemetry.Core.UnitTests
-│   ├── Gateway.OpenTelemetry.AspNetCore.UnitTests
-│   ├── Gateway.OpenTelemetry.Yarp.UnitTests
-│   ├── Gateway.OpenTelemetry.IntegrationTests
-│   └── Gateway.OpenTelemetry.IntegrationHost
-│
-└── samples
-    └── OpenTelemetry.Spike
+|
++-- src
+|   +-- Gateway.OpenTelemetry.Core
+|   +-- Gateway.OpenTelemetry.AspNetCore
+|   +-- Gateway.OpenTelemetry.Yarp
+|   +-- Gateway.OpenTelemetry.Proxy
+|
++-- tests
+|   +-- Gateway.OpenTelemetry.Core.UnitTests
+|   +-- Gateway.OpenTelemetry.AspNetCore.UnitTests
+|   +-- Gateway.OpenTelemetry.Yarp.UnitTests
+|   +-- Gateway.OpenTelemetry.Proxy.UnitTests
+|   +-- Gateway.OpenTelemetry.IntegrationTests
+|   +-- Gateway.OpenTelemetry.IntegrationHost
+|
++-- samples
+    +-- OpenTelemetry.Spike
 ```
-
----
 
 ## Repository Standards
 
-Gateway.OpenTelemetry follows several engineering practices.
-
 - Semantic Versioning
-- XML documentation
-- SourceLink enabled
-- Nullable reference types enabled
+- XML documentation for public APIs
+- Nullable reference types
+- SourceLink
+- Central Package Management
 - Unit tests
 - Integration tests
-- Central Package Management
+- Package smoke testing
 - MIT License
----
 
 ## Roadmap
 
-The following improvements are planned for future releases.
+Potential future improvements include:
 
-## Planned
-
-- Metrics enrichment
+- Additional built-in trace enrichers
+- Additional built-in metric enrichers
 - Logging enrichment
 - Health Checks integration
-- Prometheus helpers
-- OTLP configuration helpers
 - Benchmark project
 - Roslyn analyzers
-- Additional built-in enrichers
-
-The roadmap may evolve based on community feedback.
-
-## Version 1.x
-
-- Improved documentation
-- Additional built-in enrichers
-- More integration samples
-
-## Version 2.x
-
-- Metrics support
 - Additional gateway metadata
-- Expanded exporter examples
-- Optional analyzers
+- Additional exporter/configuration examples
 
-The roadmap may evolve based on community feedback and project priorities.
-
----
+Metrics enrichment and the current YARP metric tags are implemented functionality, not roadmap items.
 
 ## Contributing
 
-Contributions are welcome.
+Before submitting a change:
 
-If you would like to report a bug, request a feature, or submit improvements:
-
-1. Open an issue.
-2. Discuss the proposed change.
-3. Submit a pull request.
-
-Please ensure:
-
-- The solution builds successfully.
-- All tests pass.
-- New functionality includes appropriate unit tests.
-- Public API changes are documented.
-
----
+1. Build the solution successfully.
+2. Run the unit tests.
+3. Run integration tests when runtime behavior changes.
+4. Add tests for new functionality.
+5. Update public API documentation.
+6. Update the README when public usage changes.
 
 ## License
 
-This project is licensed under the MIT License.
-
-See the LICENSE file for details.
-
----
+This project is licensed under the MIT License. See `LICENSE` for details.
 
 ## Support
 
-For questions, bug reports, or feature requests, please use GitHub Issues.
-
-Repository:
+For questions, bug reports, and feature requests, use GitHub Issues:
 
 https://github.com/booviperza/Gateway.OpenTelemetry
 
----
-
-## Acknowledgements
-
-Gateway.OpenTelemetry is built on top of the excellent .NET ecosystem, including:
-
-- .NET
-- ASP.NET Core
-- OpenTelemetry
-- YARP (Yet Another Reverse Proxy)
-
-Special thanks to the maintainers and contributors of these open-source projects.
-
----
-
 ## Final Notes
 
-Gateway.OpenTelemetry focuses on one goal:
+Gateway.OpenTelemetry is an enrichment layer for gateway applications. It does not replace OpenTelemetry instrumentation, exporters, ASP.NET Core HTTP telemetry, or YARP.
 
-> Enrich OpenTelemetry Activities with meaningful gateway metadata while keeping the implementation simple, lightweight, and production-ready.
-
-Rather than replacing the OpenTelemetry SDK, Gateway.OpenTelemetry complements it by providing gateway-specific tracing information that is commonly required in API gateway and reverse proxy environments.
-
----
-
-If Gateway.OpenTelemetry helps your project, consider giving the repository a ⭐ on GitHub.
-
-Feedback, bug reports, feature requests, and pull requests are always welcome.
-
-Thank you for using Gateway.OpenTelemetry.
+For tracing, gateway information is added to the existing `Activity`. For metrics, YARP information is added to ASP.NET Core HTTP metric tags. This keeps gateway telemetry aligned with the OpenTelemetry ecosystem while making route, cluster, destination, endpoint, and proxy context available to observability backends.
