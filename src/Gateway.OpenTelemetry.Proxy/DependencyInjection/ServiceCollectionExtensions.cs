@@ -1,5 +1,7 @@
 using Gateway.OpenTelemetry.AspNetCore.DependencyInjection;
+using Gateway.OpenTelemetry.AspNetCore.Metrics;
 using Gateway.OpenTelemetry.AspNetCore.Tracing;
+using Gateway.OpenTelemetry.Proxy.Metrics;
 using Gateway.OpenTelemetry.Proxy.Tracing;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +35,11 @@ public static class ServiceCollectionExtensions
             ServiceDescriptor.Singleton<
                 ITraceEnricher,
                 ProxyTraceEnricher>());
+
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<
+                IMetricEnricher,
+                ProxyMetricEnricher>());
 
         return services;
     }
