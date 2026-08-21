@@ -4,8 +4,8 @@ using OpenIddict.Server;
 namespace Gateway.OpenTelemetry.OpenIddict.Integration.Token;
 
 /// <summary>
-/// Records telemetry when OpenIddict processes a successful sign-in
-/// that is configured to generate an issued token.
+/// Records telemetry when OpenIddict successfully processes
+/// a sign-in operation that generates an access token.
 /// </summary>
 internal sealed class TokenIssuedTelemetryHandler
     : IOpenIddictServerHandler<
@@ -26,7 +26,7 @@ internal sealed class TokenIssuedTelemetryHandler
     {
         ArgumentNullException.ThrowIfNull(context);
 
-        if (!context.GenerateIssuedToken)
+        if (!context.GenerateAccessToken)
         {
             return ValueTask.CompletedTask;
         }

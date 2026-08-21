@@ -35,7 +35,11 @@ internal static class OpenIddictTelemetryHandlers
                 OpenIddictServerEvents.ProcessSignInContext>()
             .UseSingletonHandler<
                 TokenIssuedTelemetryHandler>()
-            .SetOrder(100_000)
+            .SetOrder(
+                OpenIddictServerHandlers
+                    .EvaluateGeneratedTokens
+                    .Descriptor
+                    .Order + 1)
             .SetType(OpenIddictServerHandlerType.Custom)
             .Build();
 

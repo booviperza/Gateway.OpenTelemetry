@@ -2,6 +2,8 @@ using Gateway.OpenTelemetry.OpenIddict.DependencyInjection;
 using Gateway.OpenTelemetry.OpenIddict.Integration;
 using Microsoft.AspNetCore.TestHost;
 using OpenIddict.Abstractions;
+using OpenIddict.Server.AspNetCore;
+using System.Security.Claims;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 using static OpenIddict.Server.OpenIddictServerEvents;
 
@@ -88,7 +90,22 @@ public static class Program
                 {
                     builder.UseInlineHandler(context =>
                     {
-                        context.HandleRequest();
+                        if (!context.Request.IsClientCredentialsGrantType())
+                        {
+                            return default;
+                        }
+
+                        var identity = new ClaimsIdentity(
+                            authenticationType:
+                                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
+
+                        identity.AddClaim(
+                            Claims.Subject,
+                            context.ClientId ?? "test-client");
+
+                        var principal = new ClaimsPrincipal(identity);
+
+                        context.SignIn(principal);
 
                         return default;
                     });
