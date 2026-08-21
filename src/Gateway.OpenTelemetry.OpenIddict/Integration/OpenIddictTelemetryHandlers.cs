@@ -92,6 +92,7 @@ internal static class OpenIddictTelemetryHandlers
             Authorization.AuthorizationResponseDurationTelemetryHandler>()
         .SetOrder(
             OpenIddictServerHandlers
+                .Authentication
                 .AttachIssuer
                 .Descriptor
                 .Order + 1)
