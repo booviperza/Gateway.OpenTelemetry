@@ -22,17 +22,25 @@ public static class OpenIddictServerBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(builder);
 
-        builder.AddEventHandler(
-            OpenIddictTelemetryHandlers.Request);
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.Request);
 
-        builder.AddEventHandler(
-            OpenIddictTelemetryHandlers.TokenRequest);
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.RequestDuration);
 
-        builder.AddEventHandler(
-            OpenIddictTelemetryHandlers.TokenIssued);
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.TokenResponseDuration);
 
-        builder.AddEventHandler(
-            OpenIddictTelemetryHandlers.TokenFailure);
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.AuthorizationResponseDuration);
+
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.RequestDurationError);
+
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.AuthorizationRequest);
+
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.AuthorizationDenied);
+
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.TokenRequest);
+
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.TokenIssued);
+
+        builder.AddEventHandler(OpenIddictTelemetryHandlers.TokenFailure);
 
         return builder;
     }

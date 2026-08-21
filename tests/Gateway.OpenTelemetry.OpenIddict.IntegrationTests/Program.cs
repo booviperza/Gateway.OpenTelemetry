@@ -27,7 +27,11 @@ public static class Program
             {
                 options.SetTokenEndpointUris("/connect/token");
 
+                options.SetAuthorizationEndpointUris("/connect/authorize");
+
                 options.AllowClientCredentialsFlow();
+
+                options.AllowAuthorizationCodeFlow();
 
                 options.EnableDegradedMode();
 
@@ -48,68 +52,123 @@ public static class Program
                 // - The client secret is only used for validation.
                 // - It must never be added to Activity tags, metrics,
                 //   logs, or any telemetry payload.
-                options.AddEventHandler<ValidateTokenRequestContext>(builder =>
-                {
-                    builder.UseInlineHandler(context =>
+                options.AddEventHandler<ValidateTokenRequestContext>(
+                    builder =>
                     {
-                        if (!context.Request.IsClientCredentialsGrantType())
+                        builder.UseInlineHandler(context =>
                         {
+                            if (!context.Request
+                                    .IsClientCredentialsGrantType())
+                            {
+                                return default;
+                            }
+
+                            if (!string.Equals(
+                                    context.ClientId,
+                                    "test-client",
+                                    StringComparison.Ordinal))
+                            {
+                                context.Reject(
+                                    error: Errors.InvalidClient,
+                                    description:
+                                        "The specified client is invalid.");
+
+                                return default;
+                            }
+
+                            if (!string.Equals(
+                                    context.ClientSecret,
+                                    "test-secret",
+                                    StringComparison.Ordinal))
+                            {
+                                context.Reject(
+                                    error: Errors.InvalidClient,
+                                    description:
+                                        "The specified client credentials are invalid.");
+
+                                return default;
+                            }
+
                             return default;
-                        }
-
-                        if (!string.Equals(
-                                context.ClientId,
-                                "test-client",
-                                StringComparison.Ordinal))
-                        {
-                            context.Reject(
-                                error: Errors.InvalidClient,
-                                description: "The specified client is invalid.");
-
-                            return default;
-                        }
-
-                        if (!string.Equals(
-                                context.ClientSecret,
-                                "test-secret",
-                                StringComparison.Ordinal))
-                        {
-                            context.Reject(
-                                error: Errors.InvalidClient,
-                                description: "The specified client credentials are invalid.");
-
-                            return default;
-                        }
-
-                        return default;
+                        });
                     });
-                });
 
                 // Test-only token request handler.
-                options.AddEventHandler<HandleTokenRequestContext>(builder =>
-                {
-                    builder.UseInlineHandler(context =>
+                options.AddEventHandler<HandleTokenRequestContext>(
+                    builder =>
                     {
-                        if (!context.Request.IsClientCredentialsGrantType())
+                        builder.UseInlineHandler(context =>
                         {
+                            if (!context.Request
+                                    .IsClientCredentialsGrantType())
+                            {
+                                return default;
+                            }
+
+                            var identity =
+                                new ClaimsIdentity(
+                                    authenticationType:
+                                        OpenIddictServerAspNetCoreDefaults
+                                            .AuthenticationScheme);
+
+                            identity.AddClaim(
+                                Claims.Subject,
+                                context.ClientId ?? "test-client");
+
+                            var principal =
+                                new ClaimsPrincipal(identity);
+
+                            context.SignIn(principal);
+
                             return default;
-                        }
-
-                        var identity = new ClaimsIdentity(
-                            authenticationType:
-                                OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-
-                        identity.AddClaim(
-                            Claims.Subject,
-                            context.ClientId ?? "test-client");
-
-                        var principal = new ClaimsPrincipal(identity);
-
-                        context.SignIn(principal);
-
-                        return default;
+                        });
                     });
-                });
+
+                // Test-only authorization request handler.
+                //
+                // This handler only handles the request so the
+                // integration test can exercise the authorization
+                // validation pipeline. No credentials or tokens are
+                // written to telemetry.
+                options.AddEventHandler<ValidateAuthorizationRequestContext>(
+                    builder =>
+                    {
+                        builder.UseInlineHandler(context =>
+                        {
+                            if (!string.Equals(
+                                    context.ClientId,
+                                    "test-client",
+                                    StringComparison.Ordinal))
+                            {
+                                context.Reject(
+                                    error: Errors.InvalidClient,
+                                    description:
+                                        "The specified client is invalid.");
+
+                                return default;
+                            }
+
+                            return default;
+                        });
+                    });
+
+                // Test-only authorization request handler.
+                //
+                // The integration test only needs the authorization request
+                // to complete the OpenIddict pipeline after validation.
+                // No credentials, authorization codes or tokens are
+                // written to telemetry.
+                options.AddEventHandler<HandleAuthorizationRequestContext>(
+                    builder =>
+                    {
+                        builder.UseInlineHandler(context =>
+                        {
+                            context.HandleRequest();
+
+                            return default;
+                        });
+                    });
+
             });
 
         var app =

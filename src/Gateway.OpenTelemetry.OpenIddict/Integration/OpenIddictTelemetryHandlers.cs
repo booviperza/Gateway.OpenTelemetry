@@ -1,3 +1,4 @@
+using Gateway.OpenTelemetry.OpenIddict.Integration.Authorization;
 using Gateway.OpenTelemetry.OpenIddict.Integration.Token;
 using OpenIddict.Server;
 
@@ -15,6 +16,16 @@ internal static class OpenIddictTelemetryHandlers
                 OpenIddictServerEvents.ProcessRequestContext>()
             .UseSingletonHandler<
                 OpenIddictRequestTelemetryHandler>()
+            .SetOrder(100_000)
+            .SetType(OpenIddictServerHandlerType.Custom)
+            .Build();
+
+    public static OpenIddictServerHandlerDescriptor AuthorizationRequest
+        => OpenIddictServerHandlerDescriptor
+            .CreateBuilder<
+                OpenIddictServerEvents.ValidateAuthorizationRequestContext>()
+            .UseSingletonHandler<
+                AuthorizationRequestTelemetryHandler>()
             .SetOrder(100_000)
             .SetType(OpenIddictServerHandlerType.Custom)
             .Build();
@@ -50,6 +61,56 @@ internal static class OpenIddictTelemetryHandlers
             .UseSingletonHandler<
                 TokenFailureTelemetryHandler>()
             .SetOrder(100_000)
+            .SetType(OpenIddictServerHandlerType.Custom)
+            .Build();
+
+    public static OpenIddictServerHandlerDescriptor AuthorizationDenied
+        => OpenIddictServerHandlerDescriptor
+            .CreateBuilder<
+                OpenIddictServerEvents.ProcessErrorContext>()
+            .UseSingletonHandler<
+                AuthorizationDeniedTelemetryHandler>()
+            .SetOrder(100_000)
+            .SetType(OpenIddictServerHandlerType.Custom)
+            .Build();
+
+    public static OpenIddictServerHandlerDescriptor RequestDuration
+        => OpenIddictServerHandlerDescriptor
+            .CreateBuilder<
+                OpenIddictServerEvents.ProcessRequestContext>()
+            .UseSingletonHandler<
+                OpenIddictRequestDurationTelemetryHandler>()
+            .SetOrder(100_001)
+            .SetType(OpenIddictServerHandlerType.Custom)
+            .Build();
+
+    public static OpenIddictServerHandlerDescriptor AuthorizationResponseDuration
+        => OpenIddictServerHandlerDescriptor
+            .CreateBuilder<
+                OpenIddictServerEvents.ApplyAuthorizationResponseContext>()
+            .UseSingletonHandler<
+                Authorization.AuthorizationResponseDurationTelemetryHandler>()
+            .SetOrder(500_001)
+            .SetType(OpenIddictServerHandlerType.Custom)
+            .Build();
+
+    public static OpenIddictServerHandlerDescriptor RequestDurationError
+        => OpenIddictServerHandlerDescriptor
+            .CreateBuilder<
+                OpenIddictServerEvents.ProcessErrorContext>()
+            .UseSingletonHandler<
+                OpenIddictRequestDurationErrorTelemetryHandler>()
+            .SetOrder(100_001)
+            .SetType(OpenIddictServerHandlerType.Custom)
+            .Build();
+
+    public static OpenIddictServerHandlerDescriptor TokenResponseDuration
+        => OpenIddictServerHandlerDescriptor
+            .CreateBuilder<
+                OpenIddictServerEvents.ApplyTokenResponseContext>()
+            .UseSingletonHandler<
+                TokenResponseDurationTelemetryHandler>()
+            .SetOrder(100_001)
             .SetType(OpenIddictServerHandlerType.Custom)
             .Build();
 }
