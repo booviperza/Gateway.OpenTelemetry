@@ -85,14 +85,18 @@ internal static class OpenIddictTelemetryHandlers
             .Build();
 
     public static OpenIddictServerHandlerDescriptor AuthorizationResponseDuration
-        => OpenIddictServerHandlerDescriptor
-            .CreateBuilder<
-                OpenIddictServerEvents.ApplyAuthorizationResponseContext>()
-            .UseSingletonHandler<
-                Authorization.AuthorizationResponseDurationTelemetryHandler>()
-            .SetOrder(499_999)
-            .SetType(OpenIddictServerHandlerType.Custom)
-            .Build();
+    => OpenIddictServerHandlerDescriptor
+        .CreateBuilder<
+            OpenIddictServerEvents.ApplyAuthorizationResponseContext>()
+        .UseSingletonHandler<
+            Authorization.AuthorizationResponseDurationTelemetryHandler>()
+        .SetOrder(
+            OpenIddictServerHandlers
+                .AttachIssuer
+                .Descriptor
+                .Order + 1)
+        .SetType(OpenIddictServerHandlerType.Custom)
+        .Build();
 
     public static OpenIddictServerHandlerDescriptor RequestDurationError
         => OpenIddictServerHandlerDescriptor
