@@ -41,6 +41,10 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<TokenRequestTelemetryHandler>();
 
+        services.AddSingleton<TokenIssuedTelemetryHandler>();
+
+        services.AddSingleton<TokenFailureTelemetryHandler>();
+
         return services;
     }
 }

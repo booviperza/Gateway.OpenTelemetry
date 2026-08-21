@@ -28,13 +28,24 @@ internal static class OpenIddictTelemetryHandlers
             .SetOrder(100_000)
             .SetType(OpenIddictServerHandlerType.Custom)
             .Build();
+
+    public static OpenIddictServerHandlerDescriptor TokenIssued
+        => OpenIddictServerHandlerDescriptor
+            .CreateBuilder<
+                OpenIddictServerEvents.ProcessSignInContext>()
+            .UseSingletonHandler<
+                TokenIssuedTelemetryHandler>()
+            .SetOrder(100_000)
+            .SetType(OpenIddictServerHandlerType.Custom)
+            .Build();
+
     public static OpenIddictServerHandlerDescriptor TokenFailure
-    => OpenIddictServerHandlerDescriptor
-        .CreateBuilder<
-            OpenIddictServerEvents.ProcessErrorContext>()
-        .UseSingletonHandler<
-            TokenFailureTelemetryHandler>()
-        .SetOrder(100_000)
-        .SetType(OpenIddictServerHandlerType.Custom)
-        .Build();
+        => OpenIddictServerHandlerDescriptor
+            .CreateBuilder<
+                OpenIddictServerEvents.ProcessErrorContext>()
+            .UseSingletonHandler<
+                TokenFailureTelemetryHandler>()
+            .SetOrder(100_000)
+            .SetType(OpenIddictServerHandlerType.Custom)
+            .Build();
 }

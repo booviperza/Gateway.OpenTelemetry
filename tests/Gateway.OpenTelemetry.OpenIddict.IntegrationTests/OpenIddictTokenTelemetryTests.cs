@@ -228,6 +228,95 @@ public sealed class OpenIddictTokenTelemetryTests
             await application.DisposeAsync();
         }
     }
+
+    [Fact]
+    public async Task TokenRequest_Success_RecordsIssuedTelemetry()
+    {
+        using var listener =
+            new MeterListener();
+
+        var measurements =
+            new List<TokenIssuedMeasurement>();
+
+        listener.InstrumentPublished =
+            (instrument, meterListener) =>
+            {
+                if (instrument.Meter.Name ==
+                    "Gateway.OpenTelemetry.OpenIddict")
+                {
+                    meterListener.EnableMeasurementEvents(
+                        instrument);
+                }
+            };
+
+        listener.SetMeasurementEventCallback<long>(
+            (instrument, measurement, tags, _) =>
+            {
+                if (instrument.Name !=
+                    "openid_server_tokens_issued_total")
+                {
+                    return;
+                }
+
+                measurements.Add(
+                    new TokenIssuedMeasurement(
+                        measurement,
+                        tags.ToArray()));
+            });
+
+        listener.Start();
+
+        var application =
+            Program.CreateApplication();
+
+        await application.StartAsync();
+
+        try
+        {
+            var client =
+                application.GetTestClient();
+
+            using var response =
+                await client.PostAsync(
+                    "/connect/token",
+                    new FormUrlEncodedContent(
+                        new Dictionary<string, string>
+                        {
+                            ["grant_type"] =
+                                "client_credentials",
+
+                            ["client_id"] =
+                                "test-client",
+
+                            ["client_secret"] =
+                                "test-secret"
+                        }));
+
+            Assert.Equal(
+                HttpStatusCode.OK,
+                response.StatusCode);
+
+            var issued =
+                Assert.Single(
+                    measurements,
+                    measurement =>
+                        measurement.Value == 1 &&
+                        HasTag(
+                            measurement.Tags,
+                            "openiddict.grant_type",
+                            "client_credentials") &&
+                        HasTag(
+                            measurement.Tags,
+                            "openiddict.result",
+                            "success"));
+        }
+        finally
+        {
+            await application.StopAsync();
+            await application.DisposeAsync();
+        }
+    }
+
     private static bool HasTag(
         IReadOnlyList<KeyValuePair<string, object?>> tags,
         string key,
@@ -248,11 +337,9 @@ public sealed class OpenIddictTokenTelemetryTests
         return false;
     }
 
-    private sealed record TokenRequestMeasurement(
-        long Value,
-        KeyValuePair<string, object?>[] Tags);
+    private sealed record TokenRequestMeasurement(long Value, KeyValuePair<string, object?>[] Tags);
 
-    private sealed record TokenFailureMeasurement(
-        long Value,
-        KeyValuePair<string, object?>[] Tags);
+    private sealed record TokenFailureMeasurement(long Value, KeyValuePair<string, object?>[] Tags);
+
+    private sealed record TokenIssuedMeasurement(long Value, KeyValuePair<string, object?>[] Tags);
 }
