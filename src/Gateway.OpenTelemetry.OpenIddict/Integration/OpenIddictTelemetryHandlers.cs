@@ -90,7 +90,7 @@ internal static class OpenIddictTelemetryHandlers
                 OpenIddictServerEvents.ApplyAuthorizationResponseContext>()
             .UseSingletonHandler<
                 Authorization.AuthorizationResponseDurationTelemetryHandler>()
-            .SetOrder(500_001)
+            .SetOrder(499_999)
             .SetType(OpenIddictServerHandlerType.Custom)
             .Build();
 
