@@ -130,6 +130,7 @@ public static class Program
                 // integration test can exercise the authorization
                 // validation pipeline. No credentials or tokens are
                 // written to telemetry.
+                // Test-only authorization request validation.
                 options.AddEventHandler<ValidateAuthorizationRequestContext>(
                     builder =>
                     {
@@ -152,18 +153,26 @@ public static class Program
                         });
                     });
 
-                // Test-only authorization request handler.
-                //
-                // The integration test only needs the authorization request
-                // to complete the OpenIddict pipeline after validation.
-                // No credentials, authorization codes or tokens are
-                // written to telemetry.
+                // Test-only authorization response.
                 options.AddEventHandler<HandleAuthorizationRequestContext>(
                     builder =>
                     {
                         builder.UseInlineHandler(context =>
                         {
-                            context.HandleRequest();
+                            var identity =
+                                new ClaimsIdentity(
+                                    authenticationType:
+                                        OpenIddictServerAspNetCoreDefaults
+                                            .AuthenticationScheme);
+
+                            identity.AddClaim(
+                                Claims.Subject,
+                                context.ClientId ?? "test-client");
+
+                            var principal =
+                                new ClaimsPrincipal(identity);
+
+                            context.SignIn(principal);
 
                             return default;
                         });
