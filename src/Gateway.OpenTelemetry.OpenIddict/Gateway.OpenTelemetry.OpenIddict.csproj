@@ -1,0 +1,63 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+
+        <TargetFramework>net10.0</TargetFramework>
+
+        <PackageId>Gateway.OpenTelemetry.OpenIddict</PackageId>
+
+        <Title>Gateway.OpenTelemetry.OpenIddict</Title>
+
+        <Description>
+            OpenIddict integration for Gateway.OpenTelemetry.
+            Provides secure OpenIddict-specific metrics and tracing
+            without exposing secrets, credentials, tokens or sensitive data.
+        </Description>
+
+        <Authors>Booviper</Authors>
+
+        <Company>Booviper</Company>
+
+        <PackageTags>
+            opentelemetry;openiddict;identity;oauth;openid;observability
+        </PackageTags>
+
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+        <PackageIcon>icon.png</PackageIcon>
+
+    </PropertyGroup>
+
+    <ItemGroup>
+
+        <ProjectReference Include="..\Gateway.OpenTelemetry.AspNetCore\Gateway.OpenTelemetry.AspNetCore.csproj" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+
+        <PackageReference Include="Microsoft.Extensions.Options" />
+
+        <PackageReference Include="OpenTelemetry" />
+
+        <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="All" />
+
+        <PackageReference Include="OpenIddict.AspNetCore" />
+
+        <PackageReference Include="System.Security.Cryptography.Xml" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+
+        <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+
+    </ItemGroup>
+
+</Project>

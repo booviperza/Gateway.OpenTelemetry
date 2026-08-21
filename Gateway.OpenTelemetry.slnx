@@ -5,6 +5,7 @@
   <Folder Name="/src/">
     <Project Path="src/Gateway.OpenTelemetry.AspNetCore/Gateway.OpenTelemetry.AspNetCore.csproj" />
     <Project Path="src/Gateway.OpenTelemetry.Core/Gateway.OpenTelemetry.Core.csproj" />
+    <Project Path="src/Gateway.OpenTelemetry.OpenIddict/Gateway.OpenTelemetry.OpenIddict.csproj" />
     <Project Path="src/Gateway.OpenTelemetry.Proxy/Gateway.OpenTelemetry.Proxy.csproj" />
     <Project Path="src/Gateway.OpenTelemetry.Yarp/Gateway.OpenTelemetry.Yarp.csproj" />
   </Folder>
@@ -13,6 +14,8 @@
     <Project Path="tests/Gateway.OpenTelemetry.Core.UnitTests/Gateway.OpenTelemetry.Core.UnitTests.csproj" />
     <Project Path="tests/Gateway.OpenTelemetry.IntegrationHost/Gateway.OpenTelemetry.IntegrationHost.csproj" />
     <Project Path="tests/Gateway.OpenTelemetry.IntegrationTests/Gateway.OpenTelemetry.IntegrationTests.csproj" />
+    <Project Path="tests/Gateway.OpenTelemetry.OpenIddict.IntegrationTests/Gateway.OpenTelemetry.OpenIddict.IntegrationTests.csproj" />
+    <Project Path="tests/Gateway.OpenTelemetry.OpenIddict.UnitTests/Gateway.OpenTelemetry.OpenIddict.UnitTests.csproj" />
     <Project Path="tests/Gateway.OpenTelemetry.Proxy.UnitTests/Gateway.OpenTelemetry.Proxy.UnitTests.csproj" />
     <Project Path="tests/Gateway.OpenTelemetry.Yarp.UnitTests/Gateway.OpenTelemetry.Yarp.UnitTests.csproj" />
   </Folder>
