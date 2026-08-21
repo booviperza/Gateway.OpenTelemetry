@@ -28,6 +28,9 @@ public static class OpenIddictServerBuilderExtensions
         builder.AddEventHandler(
             OpenIddictTelemetryHandlers.TokenRequest);
 
+        builder.AddEventHandler(
+            OpenIddictTelemetryHandlers.TokenFailure);
+
         return builder;
     }
 }
